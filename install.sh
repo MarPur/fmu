@@ -19,7 +19,7 @@ wget_download() {
 apt_update
 
 apt_install git keepassxc flameshot gnome-tweak-tool curl vlc ripgrep btop apache2-utils docker.io \
-  virtualbox virtualbox-guest-additions-iso \
+  virtualbox virtualbox-guest-additions-iso alacritty filezilla \
   build-essential pkg-config autoconf bison clang libssl-dev zlib1g-dev libyaml-dev libreadline-dev \
   libjemalloc2 libvips sqlite3 libsqlite3-0 libmysqlclient-dev libbz2-dev libncurses5-dev libgdbm-dev \
   liblzma-dev tk-dev libffi-dev python3-gpg
@@ -105,5 +105,7 @@ apt_install /tmp/veracrypt.deb
 rm /tmp/veracrypt.deb
 
 sudo apt upgrade -y
+
+gsettings set org.gnome.shell favorite-apps "['google-chrome.desktop', 'org.keepassxc.KeePassXC.desktop', 'intellij-idea-community_intellij-idea-community.desktop', 'pycharm-community_pycharm-community.desktop', 'code.desktop', 'discord_discord.desktop', 'telegram-desktop_telegram-desktop.desktop', 'spotify_spotify.desktop', 'Alacritty.desktop', 'filezilla.desktop', 'org.gnome.Nautilus.desktop', 'org.gnome.TextEditor.desktop']"
 
 echo "Done!!!!!"
