@@ -21,6 +21,12 @@ wget_download() {
   wget -O "$1" "$2"
 }
 
+LOCAL_BIN="$HOME/.local/bin"
+mkdir -p "$LOCAL_BIN"
+
+OPT_DIR="$HOME/opt"
+mkdir -p "$OPT_DIR"
+
 apt_update
 
 apt_install git keepassxc flameshot gnome-tweak-tool curl vlc ripgrep btop apache2-utils docker.io \
@@ -31,30 +37,21 @@ apt_install git keepassxc flameshot gnome-tweak-tool curl vlc ripgrep btop apach
 
 snap_install spotify 
 
-LOCAL_BIN="$HOME/.local/bin"
-mkdir -p "$LOCAL_BIN"
-
-OPT_DIR="$HOME/opt"
-mkdir -p "$OPT_DIR"
-
 echo 'export PATH=$PATH:$HOME/.local/bin' >> ~/.bashrc
 
 # Chrome
 wget_download /tmp/chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
 apt_install /tmp/chrome.deb
-rm /tmp/chrome.deb
 
 # VS Code
 wget_download /tmp/code.deb 'https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-x64'
 apt_install /tmp/code.deb
-rm /tmp/code.deb
 
 # lazygit
 LAZYGIT_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" | grep -Po '"tag_name": "v\K[^"]*')
 wget_download /tmp/lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz"
 tar -xvf /tmp/lazygit.tar.gz -C /tmp/
 mv /tmp/lazygit "$LOCAL_BIN/lazygit"
-rm /tmp/lazygit.tar.gz
 
 # ghz
 GHZ_VERSION=$(curl -s "https://api.github.com/repos/bojand/ghz/releases/latest" | grep -Po '"tag_name": "\Kv[^"]*')
@@ -62,7 +59,6 @@ wget_download /tmp/ghz.tar.gz "https://github.com/bojand/ghz/releases/download/$
 tar -xvf /tmp/ghz.tar.gz -C /tmp/
 mv /tmp/ghz "$LOCAL_BIN/ghz"
 mv /tmp/ghz-web "$LOCAL_BIN/ghz-web"
-rm /tmp/ghz.tar.gz
 
 # oha
 OHA_VERSION=$(curl -s "https://api.github.com/repos/hatoo/oha/releases/latest" | grep -Po '"tag_name": "\Kv[^"]*')
@@ -78,11 +74,15 @@ chmod +x "$LOCAL_BIN/bazelisk"
 
 ln -s "$LOCAL_BIN/bazelisk" "$LOCAL_BIN/bazel"
 
-# buildifier
-BUILDIFIER_VERSION=$(curl -s "https://api.github.com/repos/bazelbuild/buildtools/releases/latest" | grep -Po '"tag_name": "\Kv[^"]*')
-wget_download /tmp/buildifier "https://github.com/bazelbuild/buildtools/releases/download/${BUILDIFIER_VERSION}/buildifier-linux-amd64"
+# buildifier & buildozer
+BUILDTOOLS_VERSION=$(curl -s "https://api.github.com/repos/bazelbuild/buildtools/releases/latest" | grep -Po '"tag_name": "\Kv[^"]*')
+wget_download /tmp/buildifier "https://github.com/bazelbuild/buildtools/releases/download/${BUILDTOOLS_VERSION}/buildifier-linux-amd64"
 mv /tmp/buildifier "$LOCAL_BIN/buildifier"
 chmod +x "$LOCAL_BIN/buildifier"
+
+wget_download /tmp/buildozer "https://github.com/bazelbuild/buildtools/releases/download/${BUILDTOOLS_VERSION}/buildozer-linux-amd64"
+mv /tmp/buildozer "$LOCAL_BIN/buildozer"
+chmod +x "$LOCAL_BIN/buildozer"
 
 # zellij
 ZELLIJ_VERSION=$(curl -s "https://api.github.com/repos/zellij-org/zellij/releases/latest" | grep -Po '"tag_name": "\Kv[^"]*')
@@ -96,7 +96,13 @@ echo 'eval "$(zellij setup --generate-auto-start bash)"' >> ~/.bashrc
 # VisualVM
 wget_download /tmp/visualvm.zip https://github.com/oracle/visualvm/releases/download/2.1.10/visualvm_2110.zip
 unzip /tmp/visualvm.zip -d "$OPT_DIR/"
-rm /tmp/visualvm.zip
+
+# ripgrep
+RIPGREP_VERSION=$(curl -s "https://api.github.com/repos/BurntSushi/ripgrep/releases/latest" | grep -Po '"tag_name": "\Kv[^"]*')
+wget_download /tmp/ripgrep.tar.gz "https://github.com/BurntSushi/ripgrep/releases/download/${RIPGREP_VERSION}/ripgrep-${RIPGREP_VERSION}-x86_64-unknown-linux-musl.tar.gz"
+tar -xvf /tmp/ripgrep.tar.gz -C /tmp/
+mv /tmp/ripgrep/rg "$LOCAL_BIN/rg"
+chmod +x "$LOCAL_BIN/rg"
 
 # Docker configuration
 sudo usermod -aG docker "${USER}"
@@ -158,6 +164,7 @@ gsettings set org.gnome.desktop.background secondary-color '#000000'
 gsettings set org.gnome.desktop.screensaver picture-uri 'file:///usr/share/backgrounds/Rainbow_lightbulb_by_Daniel_Micallef.png'
 gsettings set org.gnome.desktop.screensaver primary-color '#000000'
 gsettings set org.gnome.desktop.screensaver secondary-color '#000000'
+gsettings set org.gnome.mutter edge-tiling true
 
 sudo apt upgrade -y
 
