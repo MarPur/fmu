@@ -161,6 +161,37 @@ nvm use default
 # Codex CLI & OpenCode
 npm install -g @openai/codex@latest opencode-ai@latest
 
+# Go
+GO_VERSION=1.27.2
+GO_INSTALL_DIR="$OPT_DIR/go$GO_VERSION"
+if [[ ! -x "$GO_INSTALL_DIR/bin/go" ]]; then
+  wget_download /tmp/go.tar.gz "https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz"
+  mkdir -p "$GO_INSTALL_DIR"
+  tar -xzf /tmp/go.tar.gz --strip-components=1 -C "$GO_INSTALL_DIR"
+fi
+ln -sfnT "$GO_INSTALL_DIR" "$OPT_DIR/go"
+
+# Rust & Cargo (includes rustfmt and Clippy)
+curl --proto '=https' --tlsv1.2 -fsSL https://sh.rustup.rs -o /tmp/rustup-install.sh
+sh /tmp/rustup-install.sh -y --default-toolchain stable --profile default --no-modify-path
+source "$HOME/.cargo/env"
+
+for shell_profile in "$HOME/.bash_profile" "$HOME/.bashrc"; do
+  if ! grep -qF '# Go & Rust' "$shell_profile"; then
+    cat <<'EOF' >> "$shell_profile"
+
+# Go & Rust
+export PATH="$HOME/opt/go/bin:$HOME/go/bin:$PATH"
+[[ -s "$HOME/.cargo/env" ]] && source "$HOME/.cargo/env"
+EOF
+  fi
+done
+
+export PATH="$OPT_DIR/go/bin:$HOME/go/bin:$PATH"
+go version
+rustc --version
+cargo --version
+
 if ! grep -qF '# Herdr autostart' "$HOME/.bashrc"; then
   cat <<'EOF' >> "$HOME/.bashrc"
 
