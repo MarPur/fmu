@@ -51,6 +51,10 @@ HERDR_INSTALL_DIR="$LOCAL_BIN" sh /tmp/herdr-install.sh
 wget_download /tmp/code.deb 'https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-x64'
 apt_install /tmp/code.deb
 
+# Dropbox
+wget_download /tmp/dropbox.deb https://linux.dropbox.com/packages/ubuntu/dropbox_2026.09.28_amd64.deb
+apt_install /tmp/dropbox.deb
+
 # lazygit
 LAZYGIT_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" | grep -Po '"tag_name": "v\K[^"]*')
 wget_download /tmp/lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz"
