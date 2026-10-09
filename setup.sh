@@ -21,27 +21,52 @@ wget_download() {
   wget -O "$1" "$2"
 }
 
+apt_update
+sudo apt upgrade -y
+
 LOCAL_BIN="$HOME/.local/bin"
 mkdir -p "$LOCAL_BIN"
 
 OPT_DIR="$HOME/opt"
 mkdir -p "$OPT_DIR"
 
-apt_update
-
-apt_install git keepassxc flameshot gnome-tweak-tool curl vlc ripgrep btop apache2-utils docker.io \
-  virtualbox virtualbox-guest-additions-iso alacritty filezilla \
+apt_install git keepassxc flameshot gnome-tweaks curl vlc btop apache2-utils docker.io \
+  virtualbox virtualbox-guest-additions-iso filezilla \
   build-essential pkg-config autoconf bison clang libssl-dev zlib1g-dev libyaml-dev libreadline-dev \
-  libjemalloc2 libvips sqlite3 libsqlite3-0 libsqlite3-dev libmysqlclient-dev libbz2-dev libncurses5-dev \
+  libjemalloc2 libvips sqlite3 libsqlite3-0 libsqlite3-dev libmysqlclient-dev libbz2-dev libncurses-dev \
   libgdbm-dev liblzma-dev tk-dev libffi-dev python3-gpg
 
-snap_install spotify 
+snap_install spotify localsend
 
 echo 'export PATH=$PATH:$HOME/.local/bin' >> ~/.bashrc
 
-# Chrome
-wget_download /tmp/chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-apt_install /tmp/chrome.deb
+# Firefox
+sudo install -d -m 0755 /etc/apt/keyrings
+curl -fsSL https://packages.mozilla.org/apt/repo-signing-key.gpg \
+  | sudo tee /etc/apt/keyrings/packages.mozilla.org.asc > /dev/null
+echo 'deb [signed-by=/etc/apt/keyrings/packages.mozilla.org.asc] https://packages.mozilla.org/apt mozilla main' \
+  | sudo tee /etc/apt/sources.list.d/mozilla.list > /dev/null
+
+# Prefer Mozilla's DEB package and prevent Ubuntu's Snap transition package.
+sudo tee /etc/apt/preferences.d/mozilla > /dev/null <<'EOF'
+Package: firefox
+Pin: origin packages.mozilla.org
+Pin-Priority: 1000
+
+Package: firefox
+Pin: release o=Ubuntu
+Pin-Priority: -1
+EOF
+
+apt_update
+apt_install firefox
+
+# Ghostty (available in Ubuntu 26.04's repositories)
+apt_install ghostty
+
+# Herdr
+curl -fsSL https://herdr.dev/install.sh -o /tmp/herdr-install.sh
+HERDR_INSTALL_DIR="$LOCAL_BIN" sh /tmp/herdr-install.sh
 
 # VS Code
 wget_download /tmp/code.deb 'https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-x64'
@@ -84,24 +109,15 @@ wget_download /tmp/buildozer "https://github.com/bazelbuild/buildtools/releases/
 mv /tmp/buildozer "$LOCAL_BIN/buildozer"
 chmod +x "$LOCAL_BIN/buildozer"
 
-# zellij
-ZELLIJ_VERSION=$(curl -s "https://api.github.com/repos/zellij-org/zellij/releases/latest" | grep -Po '"tag_name": "\Kv[^"]*')
-wget_download /tmp/zellij.tar.gz "https://github.com/zellij-org/zellij/releases/download/${ZELLIJ_VERSION}/zellij-x86_64-unknown-linux-musl.tar.gz"
-tar -xvf /tmp/zellij.tar.gz -C /tmp/
-mv /tmp/zellij "$LOCAL_BIN/zellij"
-chmod +x "$LOCAL_BIN/zellij"
-
-echo 'eval "$(zellij setup --generate-auto-start bash)"' >> ~/.bashrc
-
 # VisualVM
-wget_download /tmp/visualvm.zip https://github.com/oracle/visualvm/releases/download/2.1.10/visualvm_2110.zip
+wget_download /tmp/visualvm.zip https://github.com/oracle/visualvm/releases/download/2.2.2/visualvm_222.zip
 unzip /tmp/visualvm.zip -d "$OPT_DIR/"
 
 # ripgrep
-RIPGREP_VERSION=$(curl -s "https://api.github.com/repos/BurntSushi/ripgrep/releases/latest" | grep -Po '"tag_name": "\Kv[^"]*')
+RIPGREP_VERSION=$(curl -fsSL "https://api.github.com/repos/BurntSushi/ripgrep/releases/latest" | grep -Po '"tag_name": "\K[^"]*')
 wget_download /tmp/ripgrep.tar.gz "https://github.com/BurntSushi/ripgrep/releases/download/${RIPGREP_VERSION}/ripgrep-${RIPGREP_VERSION}-x86_64-unknown-linux-musl.tar.gz"
 tar -xvf /tmp/ripgrep.tar.gz -C /tmp/
-mv /tmp/ripgrep/rg "$LOCAL_BIN/rg"
+mv "/tmp/ripgrep-${RIPGREP_VERSION}-x86_64-unknown-linux-musl/rg" "$LOCAL_BIN/rg"
 chmod +x "$LOCAL_BIN/rg"
 
 # Docker configuration
@@ -137,12 +153,45 @@ if ! grep -qF "pyenv virtualenv-init" "$HOME/.bashrc"; then
   echo "eval \"\$(pyenv virtualenv-init -)\"" >> "$HOME/.bashrc"
 fi
 
-$HOME/.pyenv/bin/pyenv install 3.12
+"$HOME/.pyenv/bin/pyenv" install 3.15.0
 
 # SDKMAN & Java
 curl -s "https://get.sdkman.io" | bash
 source "$HOME/.sdkman/bin/sdkman-init.sh"
-sdk install java 21.0.4-zulu
+sdk install java 25.0.4+1.1-zulu
+
+export NVM_DIR="$HOME/.nvm"
+curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.8/install.sh -o /tmp/nvm-install.sh
+PROFILE=/dev/null bash /tmp/nvm-install.sh
+
+for shell_profile in "$HOME/.bash_profile" "$HOME/.bashrc"; do
+  if ! grep -qF 'export NVM_DIR=' "$shell_profile"; then
+    cat <<'EOF' >> "$shell_profile"
+
+export NVM_DIR="$HOME/.nvm"
+[[ -s "$NVM_DIR/nvm.sh" ]] && source "$NVM_DIR/nvm.sh"
+[[ -s "$NVM_DIR/bash_completion" ]] && source "$NVM_DIR/bash_completion"
+EOF
+  fi
+done
+
+source "$NVM_DIR/nvm.sh"
+nvm install 24.21.0
+nvm alias default 24.21.0
+nvm use default
+
+# Codex CLI & OpenCode
+npm install -g @openai/codex@latest opencode-ai@latest
+
+if ! grep -qF '# Herdr autostart' "$HOME/.bashrc"; then
+  cat <<'EOF' >> "$HOME/.bashrc"
+
+# Herdr autostart
+if [[ $- == *i* && -t 0 && -t 1 && -z "${HERDR_ENV:-}" && -x "$HOME/.local/bin/herdr" ]]; then
+  "$HOME/.local/bin/herdr"
+fi
+EOF
+fi
 
 # Disable popup of apps after moving windows
 gsettings set org.gnome.shell.extensions.tiling-assistant enable-tiling-popup false
@@ -151,7 +200,7 @@ gsettings set org.gnome.shell.extensions.tiling-assistant enable-tiling-popup fa
 gsettings set org.gnome.shell.extensions.dash-to-dock dock-position 'BOTTOM'
 
 # Favourites
-gsettings set org.gnome.shell favorite-apps "['google-chrome.desktop', 'Alacritty.desktop', 'code.desktop', 'spotify_spotify.desktop', 'org.keepassxc.KeePassXC.desktop', 'org.gnome.Nautilus.desktop', 'org.gnome.TextEditor.desktop']"
+gsettings set org.gnome.shell favorite-apps "['firefox.desktop', 'com.mitchellh.ghostty.desktop', 'code.desktop', 'spotify_spotify.desktop', 'org.keepassxc.KeePassXC.desktop', 'localsend_localsend.desktop', 'filezilla.desktop', 'org.gnome.Nautilus.desktop', 'org.gnome.TextEditor.desktop']"
 
 # Theme
 gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
@@ -165,7 +214,5 @@ gsettings set org.gnome.desktop.screensaver picture-uri 'file:///usr/share/backg
 gsettings set org.gnome.desktop.screensaver primary-color '#000000'
 gsettings set org.gnome.desktop.screensaver secondary-color '#000000'
 gsettings set org.gnome.mutter edge-tiling true
-
-sudo apt upgrade -y
 
 echo "Done!!!!!"
