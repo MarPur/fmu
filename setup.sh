@@ -36,30 +36,9 @@ apt_install git keepassxc flameshot gnome-tweaks curl vlc btop apache2-utils doc
   libjemalloc2 libvips sqlite3 libsqlite3-0 libsqlite3-dev libmysqlclient-dev libbz2-dev libncurses-dev \
   libgdbm-dev liblzma-dev tk-dev libffi-dev python3-gpg
 
-snap_install spotify localsend
+snap_install firefox spotify localsend
 
 echo 'export PATH=$PATH:$HOME/.local/bin' >> ~/.bashrc
-
-# Firefox
-sudo install -d -m 0755 /etc/apt/keyrings
-curl -fsSL https://packages.mozilla.org/apt/repo-signing-key.gpg \
-  | sudo tee /etc/apt/keyrings/packages.mozilla.org.asc > /dev/null
-echo 'deb [signed-by=/etc/apt/keyrings/packages.mozilla.org.asc] https://packages.mozilla.org/apt mozilla main' \
-  | sudo tee /etc/apt/sources.list.d/mozilla.list > /dev/null
-
-# Prefer Mozilla's DEB package and prevent Ubuntu's Snap transition package.
-sudo tee /etc/apt/preferences.d/mozilla > /dev/null <<'EOF'
-Package: firefox
-Pin: origin packages.mozilla.org
-Pin-Priority: 1000
-
-Package: firefox
-Pin: release o=Ubuntu
-Pin-Priority: -1
-EOF
-
-apt_update
-apt_install firefox
 
 # Ghostty (available in Ubuntu 26.04's repositories)
 apt_install ghostty
@@ -200,7 +179,7 @@ gsettings set org.gnome.shell.extensions.tiling-assistant enable-tiling-popup fa
 gsettings set org.gnome.shell.extensions.dash-to-dock dock-position 'BOTTOM'
 
 # Favourites
-gsettings set org.gnome.shell favorite-apps "['firefox.desktop', 'com.mitchellh.ghostty.desktop', 'code.desktop', 'spotify_spotify.desktop', 'org.keepassxc.KeePassXC.desktop', 'localsend_localsend.desktop', 'filezilla.desktop', 'org.gnome.Nautilus.desktop', 'org.gnome.TextEditor.desktop']"
+gsettings set org.gnome.shell favorite-apps "['firefox_firefox.desktop', 'com.mitchellh.ghostty.desktop', 'code.desktop', 'spotify_spotify.desktop', 'org.keepassxc.KeePassXC.desktop', 'localsend_localsend.desktop', 'filezilla.desktop', 'org.gnome.Nautilus.desktop', 'org.gnome.TextEditor.desktop']"
 
 # Theme
 gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
