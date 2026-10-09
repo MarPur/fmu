@@ -76,15 +76,14 @@ wget_download /tmp/bazelisk "https://github.com/bazelbuild/bazelisk/releases/dow
 mv /tmp/bazelisk "$LOCAL_BIN/bazelisk"
 chmod +x "$LOCAL_BIN/bazelisk"
 
-ln -s "$LOCAL_BIN/bazelisk" "$LOCAL_BIN/bazel"
+ln -sfn "$LOCAL_BIN/bazelisk" "$LOCAL_BIN/bazel"
 
 # buildifier & buildozer
-BUILDTOOLS_VERSION=$(curl -s "https://api.github.com/repos/bazelbuild/buildtools/releases/latest" | grep -Po '"tag_name": "\Kv[^"]*')
-wget_download /tmp/buildifier "https://github.com/bazelbuild/buildtools/releases/download/${BUILDTOOLS_VERSION}/buildifier-linux-amd64"
+wget_download /tmp/buildifier "https://github.com/bazelbuild/buildtools/releases/latest/download/buildifier-linux-amd64"
 mv /tmp/buildifier "$LOCAL_BIN/buildifier"
 chmod +x "$LOCAL_BIN/buildifier"
 
-wget_download /tmp/buildozer "https://github.com/bazelbuild/buildtools/releases/download/${BUILDTOOLS_VERSION}/buildozer-linux-amd64"
+wget_download /tmp/buildozer "https://github.com/bazelbuild/buildtools/releases/latest/download/buildozer-linux-amd64"
 mv /tmp/buildozer "$LOCAL_BIN/buildozer"
 chmod +x "$LOCAL_BIN/buildozer"
 
@@ -193,5 +192,9 @@ gsettings set org.gnome.desktop.screensaver picture-uri 'file:///usr/share/backg
 gsettings set org.gnome.desktop.screensaver primary-color '#000000'
 gsettings set org.gnome.desktop.screensaver secondary-color '#000000'
 gsettings set org.gnome.mutter edge-tiling true
+
+# Remove unused packages and clear the APT download cache.
+sudo apt autoremove -y
+sudo apt clean
 
 echo "Done!!!!!"
