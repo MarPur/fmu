@@ -212,13 +212,15 @@ gsettings set org.gnome.shell favorite-apps "['firefox_firefox.desktop', 'com.mi
 
 # Theme
 gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
-gsettings set org.gnome.desktop.interface gtk-theme 'Yaru-viridian-dark'
-gsettings set org.gnome.desktop.interface icon-theme 'Yaru-viridian'
-gsettings set org.gnome.desktop.background picture-uri 'file:///usr/share/backgrounds/Rainbow_lightbulb_by_Daniel_Micallef.png'
-gsettings set org.gnome.desktop.background picture-uri-dark 'file:///usr/share/backgrounds/Rainbow_lightbulb_by_Daniel_Micallef.png'
+gsettings set org.gnome.desktop.interface accent-color 'blue'
+gsettings set org.gnome.desktop.interface gtk-theme 'Yaru-purple'
+gsettings set org.gnome.desktop.interface icon-theme 'Yaru-purple'
+gsettings set org.gnome.desktop.interface cursor-theme 'Yaru'
+gsettings set org.gnome.desktop.background picture-uri 'file:///usr/share/backgrounds/mizuno-as-Winter_Grand_Triangle.jpg'
+gsettings set org.gnome.desktop.background picture-uri-dark 'file:///usr/share/backgrounds/mizuno-as-Winter_Grand_Triangle.jpg'
 gsettings set org.gnome.desktop.background primary-color '#000000'
 gsettings set org.gnome.desktop.background secondary-color '#000000'
-gsettings set org.gnome.desktop.screensaver picture-uri 'file:///usr/share/backgrounds/Rainbow_lightbulb_by_Daniel_Micallef.png'
+gsettings set org.gnome.desktop.screensaver picture-uri 'file:///usr/share/backgrounds/mizuno-as-Winter_Grand_Triangle.jpg'
 gsettings set org.gnome.desktop.screensaver primary-color '#000000'
 gsettings set org.gnome.desktop.screensaver secondary-color '#000000'
 gsettings set org.gnome.mutter edge-tiling true
