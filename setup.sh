@@ -36,6 +36,10 @@ apt_install git keepassxc flameshot gnome-tweaks curl vlc btop apache2-utils doc
   libjemalloc2 libvips sqlite3 libsqlite3-0 libsqlite3-dev libmysqlclient-dev libbz2-dev libncurses-dev \
   libgdbm-dev liblzma-dev tk-dev libffi-dev python3-gpg
 
+# Git configuration
+git config --global user.name 'Martynas Puronas'
+git config --global user.email 'martynas@puronas.me'
+
 snap_install firefox spotify localsend
 
 echo 'export PATH=$PATH:$HOME/.local/bin' >> ~/.bashrc
@@ -118,22 +122,18 @@ EOL
 # pyenv
 curl https://pyenv.run | bash
 
-set_up_pyenv() {  
-  if ! grep -qF "export PYENV_ROOT" "$1"; then
-      cat <<EOF >> "$1"
+set_up_pyenv() {
+  cat <<EOF >> "$1"
 export PYENV_ROOT="\$HOME/.pyenv"
 [[ -d \$PYENV_ROOT/bin ]] && export PATH="\$PYENV_ROOT/bin:\$PATH"
 eval "\$(pyenv init -)"
 EOF
-  fi
 }
 
 set_up_pyenv "$HOME/.bash_profile"
 set_up_pyenv "$HOME/.bashrc"
 
-if ! grep -qF "pyenv virtualenv-init" "$HOME/.bashrc"; then
-  echo "eval \"\$(pyenv virtualenv-init -)\"" >> "$HOME/.bashrc"
-fi
+echo "eval \"\$(pyenv virtualenv-init -)\"" >> "$HOME/.bashrc"
 
 "$HOME/.pyenv/bin/pyenv" install 3.15.0
 
@@ -147,14 +147,12 @@ curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.8/install.sh -o /t
 PROFILE=/dev/null bash /tmp/nvm-install.sh
 
 for shell_profile in "$HOME/.bash_profile" "$HOME/.bashrc"; do
-  if ! grep -qF 'export NVM_DIR=' "$shell_profile"; then
-    cat <<'EOF' >> "$shell_profile"
+  cat <<'EOF' >> "$shell_profile"
 
 export NVM_DIR="$HOME/.nvm"
 [[ -s "$NVM_DIR/nvm.sh" ]] && source "$NVM_DIR/nvm.sh"
 [[ -s "$NVM_DIR/bash_completion" ]] && source "$NVM_DIR/bash_completion"
 EOF
-  fi
 done
 
 source "$NVM_DIR/nvm.sh"
@@ -165,14 +163,15 @@ nvm use default
 # Codex CLI & OpenCode
 npm install -g @openai/codex@latest opencode-ai@latest
 
+# Codex Bash alias
+echo "alias codex='codex --yolo'" >> "$HOME/.bashrc"
+
 # Go
 GO_VERSION=1.27.2
 GO_INSTALL_DIR="$OPT_DIR/go$GO_VERSION"
-if [[ ! -x "$GO_INSTALL_DIR/bin/go" ]]; then
-  wget_download /tmp/go.tar.gz "https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz"
-  mkdir -p "$GO_INSTALL_DIR"
-  tar -xzf /tmp/go.tar.gz --strip-components=1 -C "$GO_INSTALL_DIR"
-fi
+wget_download /tmp/go.tar.gz "https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz"
+mkdir -p "$GO_INSTALL_DIR"
+tar -xzf /tmp/go.tar.gz --strip-components=1 -C "$GO_INSTALL_DIR"
 ln -sfnT "$GO_INSTALL_DIR" "$OPT_DIR/go"
 
 # Rust & Cargo (includes rustfmt and Clippy)
@@ -181,14 +180,12 @@ sh /tmp/rustup-install.sh -y --default-toolchain stable --profile default --no-m
 source "$HOME/.cargo/env"
 
 for shell_profile in "$HOME/.bash_profile" "$HOME/.bashrc"; do
-  if ! grep -qF '# Go & Rust' "$shell_profile"; then
-    cat <<'EOF' >> "$shell_profile"
+  cat <<'EOF' >> "$shell_profile"
 
 # Go & Rust
 export PATH="$HOME/opt/go/bin:$HOME/go/bin:$PATH"
 [[ -s "$HOME/.cargo/env" ]] && source "$HOME/.cargo/env"
 EOF
-  fi
 done
 
 export PATH="$OPT_DIR/go/bin:$HOME/go/bin:$PATH"
@@ -196,15 +193,13 @@ go version
 rustc --version
 cargo --version
 
-if ! grep -qF '# Herdr autostart' "$HOME/.bashrc"; then
-  cat <<'EOF' >> "$HOME/.bashrc"
+cat <<'EOF' >> "$HOME/.bashrc"
 
 # Herdr autostart
 if [[ $- == *i* && -t 0 && -t 1 && -z "${HERDR_ENV:-}" && -x "$HOME/.local/bin/herdr" ]]; then
   "$HOME/.local/bin/herdr"
 fi
 EOF
-fi
 
 # Disable popup of apps after moving windows
 gsettings set org.gnome.shell.extensions.tiling-assistant enable-tiling-popup false
