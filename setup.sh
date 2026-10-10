@@ -42,13 +42,8 @@ apt_install git keepassxc flameshot gnome-tweaks curl vlc btop apache2-utils doc
   docker-compose-v2 virtualbox virtualbox-guest-additions-iso filezilla \
   build-essential pkg-config autoconf bison clang libssl-dev zlib1g-dev libyaml-dev libreadline-dev \
   libjemalloc2 libvips sqlite3 libsqlite3-0 libsqlite3-dev libmysqlclient-dev libbz2-dev libncurses-dev \
-  libgdbm-dev liblzma-dev tk-dev libffi-dev python3-gpg
-
-# Network tools
-apt_install wireshark nmap
-
-# Games
-apt_install steam-installer openttd vcmi
+  libgdbm-dev liblzma-dev tk-dev libffi-dev python3-gpg \
+  wireshark nmap steam-installer openttd vcmi ghostty
 
 # Git configuration
 git config --global user.name 'Martynas Puronas'
@@ -57,9 +52,6 @@ git config --global user.email 'martynas@puronas.me'
 snap_install firefox spotify localsend
 
 echo 'export PATH=$PATH:$HOME/.local/bin' >> ~/.bashrc
-
-# Ghostty
-apt_install ghostty
 
 # Herdr
 curl -fsSL https://herdr.dev/install.sh -o /tmp/herdr-install.sh
