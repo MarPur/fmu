@@ -10,7 +10,7 @@ apt_update() {
 }
 
 apt_install() {
-  sudo apt install --install-recommends -y "$@"
+  sudo DEBIAN_FRONTEND=noninteractive apt install --install-recommends -y "$@"
 }
 
 snap_install() {
@@ -38,12 +38,17 @@ mkdir -p "$LOCAL_BIN"
 OPT_DIR="$HOME/opt"
 mkdir -p "$OPT_DIR"
 
+# Wireshark: allow members of the wireshark group to capture packets
+printf '%s\n' 'wireshark-common wireshark-common/install-setuid boolean true' | sudo debconf-set-selections
+
 apt_install git keepassxc flameshot gnome-tweaks curl vlc btop apache2-utils docker.io \
   docker-compose-v2 virtualbox virtualbox-guest-additions-iso filezilla \
   build-essential pkg-config autoconf bison clang libssl-dev zlib1g-dev libyaml-dev libreadline-dev \
   libjemalloc2 libvips sqlite3 libsqlite3-0 libsqlite3-dev libmysqlclient-dev libbz2-dev libncurses-dev \
   libgdbm-dev liblzma-dev tk-dev libffi-dev python3-gpg \
   wireshark nmap steam-installer openttd vcmi ghostty
+
+sudo usermod -aG wireshark "$USER"
 
 # Git configuration
 git config --global user.name 'Martynas Puronas'
@@ -60,6 +65,37 @@ HERDR_INSTALL_DIR="$LOCAL_BIN" sh /tmp/herdr-install.sh
 # VS Code
 wget_download /tmp/code.deb 'https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-x64'
 apt_install /tmp/code.deb
+
+# VS Code extensions
+VSCODE_EXTENSIONS=(
+  # Java
+  vscjava.vscode-java-pack
+  redhat.java
+  vscjava.vscode-java-debug
+  vscjava.vscode-java-test
+  vscjava.vscode-java-dependency
+  vscjava.vscode-maven
+  vscjava.vscode-gradle
+  # Python
+  ms-python.python
+  ms-python.vscode-pylance
+  ms-python.debugpy
+  ms-python.vscode-python-envs
+  # Rust
+  rust-lang.rust-analyzer
+  vadimcn.vscode-lldb
+  # Go
+  golang.go
+  # Bazel
+  bazelbuild.vscode-bazel
+  # Codex
+  openai.chatgpt
+  openai.codex-audio
+)
+
+for extension in "${VSCODE_EXTENSIONS[@]}"; do
+  code --install-extension "$extension"
+done
 
 # ChatGPT Desktop
 wget_download /tmp/chatgpt.deb 'https://persistent.oaistatic.com/codex-app-prod/linux/deb/latest/chatgpt_amd64.deb'
