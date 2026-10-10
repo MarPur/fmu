@@ -44,7 +44,7 @@ snap_install firefox spotify localsend
 
 echo 'export PATH=$PATH:$HOME/.local/bin' >> ~/.bashrc
 
-# Ghostty (available in Ubuntu 26.04's repositories)
+# Ghostty
 apt_install ghostty
 
 # Herdr
@@ -136,6 +136,7 @@ set_up_pyenv "$HOME/.bashrc"
 echo "eval \"\$(pyenv virtualenv-init -)\"" >> "$HOME/.bashrc"
 
 "$HOME/.pyenv/bin/pyenv" install 3.15.0
+"$HOME/.pyenv/bin/pyenv" global 3.15.0
 
 # SDKMAN & Java
 curl -s "https://get.sdkman.io" | bash
@@ -163,8 +164,9 @@ nvm use default
 # Codex CLI & OpenCode
 npm install -g @openai/codex@latest opencode-ai@latest
 
-# Codex Bash alias
+# Codex settings
 echo "alias codex='codex --yolo'" >> "$HOME/.bashrc"
+codex features disable worktrees
 
 # Go
 GO_VERSION=1.27.2
@@ -174,7 +176,7 @@ mkdir -p "$GO_INSTALL_DIR"
 tar -xzf /tmp/go.tar.gz --strip-components=1 -C "$GO_INSTALL_DIR"
 ln -sfnT "$GO_INSTALL_DIR" "$OPT_DIR/go"
 
-# Rust & Cargo (includes rustfmt and Clippy)
+# Rust
 curl --proto '=https' --tlsv1.2 -fsSL https://sh.rustup.rs -o /tmp/rustup-install.sh
 sh /tmp/rustup-install.sh -y --default-toolchain stable --profile default --no-modify-path
 source "$HOME/.cargo/env"
@@ -229,4 +231,4 @@ gsettings set org.gnome.mutter edge-tiling true
 sudo apt autoremove -y
 sudo apt clean
 
-echo "Done!!!!!"
+echo "Done!"
