@@ -22,6 +22,14 @@ wget_download() {
 }
 
 apt_update
+
+# Ubuntu repositories and Steam's 32-bit dependencies
+apt_install software-properties-common
+sudo add-apt-repository --yes --no-update universe
+sudo add-apt-repository --yes --no-update multiverse
+sudo dpkg --add-architecture i386
+apt_update
+
 sudo apt upgrade -y
 
 LOCAL_BIN="$HOME/.local/bin"
@@ -31,10 +39,16 @@ OPT_DIR="$HOME/opt"
 mkdir -p "$OPT_DIR"
 
 apt_install git keepassxc flameshot gnome-tweaks curl vlc btop apache2-utils docker.io \
-  virtualbox virtualbox-guest-additions-iso filezilla \
+  docker-compose-v2 virtualbox virtualbox-guest-additions-iso filezilla \
   build-essential pkg-config autoconf bison clang libssl-dev zlib1g-dev libyaml-dev libreadline-dev \
   libjemalloc2 libvips sqlite3 libsqlite3-0 libsqlite3-dev libmysqlclient-dev libbz2-dev libncurses-dev \
   libgdbm-dev liblzma-dev tk-dev libffi-dev python3-gpg
+
+# Network tools
+apt_install wireshark nmap
+
+# Games
+apt_install steam-installer openttd vcmi
 
 # Git configuration
 git config --global user.name 'Martynas Puronas'
@@ -54,6 +68,15 @@ HERDR_INSTALL_DIR="$LOCAL_BIN" sh /tmp/herdr-install.sh
 # VS Code
 wget_download /tmp/code.deb 'https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-x64'
 apt_install /tmp/code.deb
+
+# ChatGPT Desktop
+wget_download /tmp/chatgpt.deb 'https://persistent.oaistatic.com/codex-app-prod/linux/deb/latest/chatgpt_amd64.deb'
+apt_install /tmp/chatgpt.deb
+
+# MySQL Workbench
+MYSQL_WORKBENCH_VERSION=26.7.0
+wget_download /tmp/mysql-workbench.deb "https://dev.mysql.com/get/Downloads/MySQLGUITools/mysql-workbench_${MYSQL_WORKBENCH_VERSION}-1_amd64.deb"
+apt_install /tmp/mysql-workbench.deb
 
 # Dropbox
 wget_download /tmp/dropbox.deb https://linux.dropbox.com/packages/ubuntu/dropbox_2026.09.28_amd64.deb
@@ -202,6 +225,29 @@ if [[ $- == *i* && -t 0 && -t 1 && -z "${HERDR_ENV:-}" && -x "$HOME/.local/bin/h
   "$HOME/.local/bin/herdr"
 fi
 EOF
+
+# Keyboard layouts (Lithuanian US first, matching the current laptop)
+gsettings set org.gnome.desktop.input-sources sources "[('xkb', 'lt+us'), ('xkb', 'us')]"
+gsettings set org.gnome.desktop.input-sources mru-sources "[('xkb', 'lt+us'), ('xkb', 'us')]"
+
+# Switch layouts with Super+Space (Shift reverses direction), or the keyboard-layout key
+gsettings set org.gnome.desktop.wm.keybindings switch-input-source "['<Super>space', 'XF86Keyboard']"
+gsettings set org.gnome.desktop.wm.keybindings switch-input-source-backward "['<Shift><Super>space', '<Shift>XF86Keyboard']"
+
+# Battery, screen blanking, and AC power
+gsettings set org.gnome.desktop.interface show-battery-percentage true
+gsettings set org.gnome.desktop.session idle-delay 600
+gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-ac-type 'nothing'
+
+# Privacy
+gsettings set org.gnome.desktop.privacy remember-recent-files false
+
+# Allow volume above 100%
+gsettings set org.gnome.desktop.sound allow-volume-above-100-percent true
+
+# Timezone
+gsettings set org.gnome.desktop.datetime automatic-timezone false
+sudo timedatectl set-timezone Europe/Vilnius
 
 # Disable popup of apps after moving windows
 gsettings set org.gnome.shell.extensions.tiling-assistant enable-tiling-popup false
